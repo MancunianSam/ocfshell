@@ -1,0 +1,38 @@
+name: DR2 Release Anonymiser Binary and docker image
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - id: next-tag
+        run: echo next-version=$(curl -s $GITHUB_API_URL/repos/nationalarchives/dr2-ingest/tags | jq -r '.[0].name' | awk -F. -v OFS=. '{ $3++; print }') >> "$GITHUB_OUTPUT"
+      - run: |
+          sudo apt-get install musl-tools
+          rustup target add x86_64-unknown-linux-musl
+          cargo build --release --target x86_64-unknown-linux-musl
+          git tag ${{ steps.next-tag.outputs.next-version }}
+          git push origin ${{ steps.next-tag.outputs.next-version }}
+          gh release create ${{ steps.next-tag.outputs.next-version }} target/release/anonymiser
+  documentation-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+        with:
+          fetch-depth: '0'
+      - run:  |
+          cargo doc --no-deps --workspace --document-private-items
+          git config --global user.email 181243999+tna-da-bot@users.noreply.github.com 
+          git config --global user.name tna-da-bot
+          git checkout gh-pages
+          rm -rf docs
+          mv target/doc/ docs
+          git add docs
+          git commit -m "Update site documentation"
+          git push -u origin gh-pages
