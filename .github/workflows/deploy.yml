@@ -1,4 +1,4 @@
-name: DR2 Release Anonymiser Binary and docker image
+name: Release OCFShell
 on:
   push:
     branches:
@@ -20,6 +20,8 @@ jobs:
           git tag ${{ steps.next-tag.outputs.next-version }}
           git push origin ${{ steps.next-tag.outputs.next-version }}
           gh release create ${{ steps.next-tag.outputs.next-version }} target/release/anonymiser
+        env:
+          GH_TOKEN: ${{ github.token }}
   documentation-deploy:
     runs-on: ubuntu-latest
     steps:
@@ -36,3 +38,5 @@ jobs:
           git add docs
           git commit -m "Update site documentation"
           git push -u origin gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
