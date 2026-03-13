@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
       - id: next-tag
-        run: echo next-version=$(curl -s $GITHUB_API_URL/repos/nationalarchives/dr2-ingest/tags | jq -r '.[0].name' | awk -F. -v OFS=. '{ $3++; print }') >> "$GITHUB_OUTPUT"
+        run: echo next-version=$(curl -s $GITHUB_API_URL/repos/MancunianSam/ocfshell/tags | jq -r '.[0].name' | awk -F. -v OFS=. '{ $3++; print }') >> "$GITHUB_OUTPUT"
       - run: |
           sudo apt-get install musl-tools
           rustup target add x86_64-unknown-linux-musl
